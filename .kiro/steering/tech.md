@@ -1,17 +1,17 @@
 ---
 inclusion: always
 ---
-# Stack técnico
+# Tech stack
 
-- Lenguaje: TypeScript estricto en todo el repo, Node 20.
-- Telefonía: Twilio Voice (PSTN y Voice JS SDK), Media Streams por WebSocket.
-- Voz: Amazon Nova Sonic en Bedrock; respaldo Transcribe streaming + Claude en Bedrock + Polly neural.
-- Infraestructura: AWS CDK. ECS Fargate (gateway), Lambda (notificador), DynamoDB tabla única, S3 con SSE-KMS, KMS, EventBridge, Cognito, CloudFront.
-- Frontend: React + Vite, sin librerías de componentes; estilos con los tokens de `packages/design-tokens`.
-- Pruebas: Vitest, fast-check para propiedades, `npm run eval` para el conjunto de guiones.
+- Language: strict TypeScript across the repo, Node 20+.
+- Telephony: Twilio Voice (PSTN and Voice JS SDK), Media Streams over WebSocket.
+- Speech: Amazon Nova Sonic on Bedrock; fallback Transcribe streaming + Claude on Bedrock + Polly neural voices.
+- Infrastructure: AWS CDK. ECS Fargate (gateway), Lambda (notifier), DynamoDB single table, S3 with SSE-KMS, KMS, EventBridge, Cognito, CloudFront.
+- Frontend: React + Vite, no component libraries; styling with the tokens in `packages/design-tokens`.
+- Testing: Vitest, fast-check for properties, `npm run eval` for the script set.
 
-Reglas:
-- `packages/risk-engine` no importa nada de red ni del SDK de AWS; es una función pura.
-- Nunca subir secretos; se leen de AWS Secrets Manager o variables de entorno locales en `.env` ignorado.
-- Toda salida del LLM se valida con un esquema (zod) antes de usarse.
-- Montos y números de cuentas se enmascaran antes de persistir.
+Rules:
+- `packages/risk-engine` imports nothing network-related and nothing from the AWS SDK; it is a pure function.
+- Never commit secrets; read them from AWS Secrets Manager or from a local, ignored `.env`.
+- Validate every LLM output with a schema (zod) before using it.
+- Mask amounts and account numbers before persisting.

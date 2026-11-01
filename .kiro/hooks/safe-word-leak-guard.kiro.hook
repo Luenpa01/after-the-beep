@@ -1,7 +1,7 @@
 {
   "enabled": false,
-  "name": "Guardia de la palabra clave",
-  "description": "Revisa que ningún cambio escriba la palabra clave en logs, transcripciones, prompts o alertas.",
+  "name": "Safe word leak guard",
+  "description": "Checks that no change writes the safe word to logs, transcripts, prompts, or alerts.",
   "version": "1",
   "when": {
     "type": "fileEdited",
@@ -9,6 +9,6 @@
   },
   "then": {
     "type": "askAgent",
-    "prompt": "Revisa el archivo editado. Si alguna variable relacionada con la palabra clave (safeWord, safeWordPlain o similares) llega a un logger, a una transcripción persistida, a un prompt o a una alerta, señálalo con la línea exacta y propone la corrección, según el requisito 9.1."
+    "prompt": "Review the edited file. If any safe-word variable (safeWord, safeWordPlain, or similar) reaches a logger, a persisted transcript, a prompt, or an alert, point to the exact line and propose a fix, per requirement 9.1."
   }
 }

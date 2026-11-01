@@ -1,152 +1,152 @@
-# Requisitos — After the Beep
+# Requirements — After the Beep
 
-## Introducción
+## Introduction
 
-After the Beep revive el contestador automático de los años 80 como un escudo contra estafas telefónicas dirigidas a adultos mayores. Toda llamada de un número desconocido la atiende primero un agente de voz que identifica a quien llama, verifica a los supuestos familiares con una palabra clave y suma señales de estafa en vivo. Si la llamada es una estafa, el teléfono de la persona mayor nunca timbra y la familia recibe una alerta.
+After the Beep resurrects the 1980s answering machine as a shield against phone scams targeting older adults. Every call from an unknown number is answered first by a voice agent that identifies the caller, verifies anyone claiming to be family with a safe word, and scores scam signals live. If the call is a scam, the protected person's phone never rings and the family gets an alert.
 
-Problema que resuelve: en 2025 las personas de 60 años o más reportaron al IC3 del FBI 201.266 denuncias y USD 7.748 millones en pérdidas (+59% frente a 2024), con una pérdida promedio de USD 38.500. Las estafas con voz clonada y suplantación de familiares crecen porque la voz ya no sirve como prueba de identidad.
+The problem: in 2025, people aged 60 and older filed 201,266 complaints with the FBI's IC3 and reported USD 7.748 billion in losses (+59% vs. 2024), with an average loss of USD 38,500 per victim. Voice-clone and family-impersonation scams are growing because a familiar voice is no longer proof of identity.
 
-Usuarios:
-- **Persona protegida** (Doña Gloria): adulta mayor, poca tolerancia a interfaces complejas.
-- **Cuidador familiar** (Camila): configura el sistema, recibe alertas, revisa el historial.
-- **Persona que llama**: legítima o estafadora.
-- **Jurado del hackathon**: debe poder probar el sistema sin un teléfono real.
+Users:
+- **Protected person** ("Grandma Gloria"): older adult, low tolerance for complex interfaces.
+- **Family caregiver** ("Camila"): sets up the system, receives alerts, reviews history.
+- **Caller**: legitimate or scammer.
+- **Hackathon judge**: must be able to test the system without a real phone.
 
-Categoría Kiroween: Resurrection (contestador automático + agente de voz).
+Kiroween category: Resurrection (answering machine + voice agent).
 
-## Requisito 1 — Atención y aviso inicial
+## Requirement 1 — Screening and opening disclosure
 
-**Historia de usuario:** Como cuidadora, quiero que toda llamada desconocida la atienda primero el contestador, para que mi mamá no tenga que decidir sola si es una estafa.
+**User story:** As a caregiver, I want every unknown call answered by the machine first, so my mom doesn't have to decide alone whether it's a scam.
 
-### Criterios de aceptación
-1. CUANDO entre una llamada de un número que no está en la lista de contactos, EL SISTEMA DEBERÁ atenderla sin hacer timbrar el teléfono de la persona protegida.
-2. CUANDO el sistema atienda una llamada, EL SISTEMA DEBERÁ informar en los primeros 5 segundos que la llamada la atiende un asistente automático y que queda grabada.
-3. CUANDO el sistema atienda una llamada, EL SISTEMA DEBERÁ preguntar quién llama y el motivo de la llamada.
-4. SI quien llama cuelga antes de identificarse, ENTONCES EL SISTEMA DEBERÁ registrar la llamada como "colgó sin identificarse" sin alertar a la familia.
+### Acceptance criteria
+1. WHEN a call arrives from a number not in the contact list, THE SYSTEM SHALL answer it without ringing the protected person's phone.
+2. WHEN the system answers a call, THE SYSTEM SHALL state within the first 5 seconds that an automated assistant is answering and that the call is recorded.
+3. WHEN the system answers a call, THE SYSTEM SHALL ask who is calling and why.
+4. IF the caller hangs up before identifying themselves, THEN THE SYSTEM SHALL log the call as "hung up without identifying" without alerting the family.
 
-## Requisito 2 — Contactos de confianza
+## Requirement 2 — Trusted contacts
 
-**Historia de usuario:** Como cuidadora, quiero que los contactos conocidos pasen directo, para que el sistema no estorbe a la familia.
+**User story:** As a caregiver, I want known contacts to go straight through, so the system doesn't get in the family's way.
 
-### Criterios de aceptación
-1. CUANDO entre una llamada de un número en la lista de contactos, EL SISTEMA DEBERÁ transferirla de inmediato al teléfono de la persona protegida.
-2. DONDE el hogar active el modo estricto, EL SISTEMA DEBERÁ aplicar la detección de señales también a los contactos de confianza, porque el identificador de llamadas se puede falsificar.
-3. EL SISTEMA DEBERÁ permitir hasta 50 contactos por hogar.
+### Acceptance criteria
+1. WHEN a call arrives from a number in the contact list, THE SYSTEM SHALL transfer it immediately to the protected person's phone.
+2. WHERE the household enables strict mode, THE SYSTEM SHALL also apply signal detection to trusted contacts, because caller ID can be spoofed.
+3. THE SYSTEM SHALL allow up to 50 contacts per household.
 
-## Requisito 3 — Verificación con palabra clave
+## Requirement 3 — Safe word verification
 
-**Historia de usuario:** Como cuidadora, quiero que quien diga ser de la familia demuestre conocer nuestra palabra clave, para que una voz clonada no engañe a mi mamá.
+**User story:** As a caregiver, I want anyone claiming to be family to prove they know our safe word, so a cloned voice can't fool my mom.
 
-### Criterios de aceptación
-1. CUANDO quien llama diga ser un familiar o un contacto conocido desde un número desconocido, EL SISTEMA DEBERÁ pedirle la palabra clave del hogar.
-2. CUANDO la palabra clave dicha coincida con la configurada (tolerando errores de transcripción de hasta una edición por cada 6 caracteres y sin distinguir tildes ni mayúsculas), EL SISTEMA DEBERÁ restar 45 puntos al puntaje de sospecha.
-3. SI quien llama no sabe la palabra clave o la evade, ENTONCES EL SISTEMA DEBERÁ sumar 30 puntos al puntaje de sospecha.
-4. EL SISTEMA NO DEBERÁ revelar la palabra clave, pistas sobre ella ni si un intento fue "casi correcto".
-5. EL SISTEMA DEBERÁ permitir como máximo 2 intentos por llamada.
+### Acceptance criteria
+1. WHEN a caller claims to be a relative or known contact from an unknown number, THE SYSTEM SHALL ask for the household safe word.
+2. WHEN the spoken safe word matches the configured one (tolerating transcription errors of up to one edit per 6 characters, ignoring accents and case), THE SYSTEM SHALL subtract 45 points from the suspicion score.
+3. IF the caller doesn't know the safe word or dodges the question, THEN THE SYSTEM SHALL add 30 points to the suspicion score.
+4. THE SYSTEM SHALL NOT reveal the safe word, hints about it, or whether an attempt was "close".
+5. THE SYSTEM SHALL allow at most 2 attempts per call.
 
-## Requisito 4 — Detección de señales y puntaje en vivo
+## Requirement 4 — Live signal detection and scoring
 
-**Historia de usuario:** Como cuidadora, quiero que el sistema detecte tácticas de estafa conocidas durante la conversación, para bloquear la llamada antes de que hagan daño.
+**User story:** As a caregiver, I want the system to detect known scam tactics during the conversation, so it blocks the call before any harm is done.
 
-### Criterios de aceptación
-1. EL SISTEMA DEBERÁ iniciar cada llamada con un puntaje de sospecha de 10 sobre 100.
-2. CUANDO un turno de quien llama contenga una señal del catálogo (Anexo A), EL SISTEMA DEBERÁ sumar su peso al puntaje y guardar el fragmento de texto que la evidencia.
-3. EL SISTEMA DEBERÁ mantener el puntaje entre 0 y 100.
-4. EL SISTEMA DEBERÁ contar cada tipo de señal una sola vez por llamada.
-5. CUANDO quien llama pida un código de verificación, una contraseña o un PIN, EL SISTEMA DEBERÁ responder que ninguna entidad legítima pide esos datos por teléfono.
-6. EL SISTEMA DEBERÁ combinar reglas deterministas y un clasificador con modelo de lenguaje, y SI el modelo falla o tarda más de 2 segundos, ENTONCES EL SISTEMA DEBERÁ decidir solo con las reglas.
+### Acceptance criteria
+1. THE SYSTEM SHALL start every call with a suspicion score of 10 out of 100.
+2. WHEN a caller turn contains a signal from the catalog (Appendix A), THE SYSTEM SHALL add its weight to the score and store the text fragment that evidences it.
+3. THE SYSTEM SHALL keep the score between 0 and 100.
+4. THE SYSTEM SHALL count each signal type only once per call.
+5. WHEN the caller asks for a verification code, password, or PIN, THE SYSTEM SHALL reply that no legitimate institution asks for those over the phone.
+6. THE SYSTEM SHALL combine deterministic rules with a language-model classifier, and IF the model fails or takes longer than 2 seconds, THEN THE SYSTEM SHALL decide using rules only.
 
-## Requisito 5 — Decisión
+## Requirement 5 — Verdict
 
-**Historia de usuario:** Como persona protegida, quiero que mi teléfono solo timbre cuando vale la pena, para no tener que lidiar con estafadores.
+**User story:** As a protected person, I want my phone to ring only when it's worth it, so I never have to deal with scammers.
 
-### Criterios de aceptación
-1. CUANDO el puntaje llegue a 60 o más, EL SISTEMA DEBERÁ cerrar la llamada con un mensaje neutral y marcarla como bloqueada.
-2. CUANDO la conversación termine con un puntaje menor que 30 y la llamada requiera respuesta en vivo (familiar verificado, urgencia legítima), EL SISTEMA DEBERÁ timbrar a la persona protegida y anunciarle quién llama y por qué antes de conectar.
-3. CUANDO la conversación termine con un puntaje menor que 60 y sin necesidad de respuesta en vivo, EL SISTEMA DEBERÁ guardar el mensaje sin interrumpir.
-4. EL SISTEMA DEBERÁ decidir en un máximo de 90 segundos de conversación; SI no ha decidido, ENTONCES DEBERÁ guardar el mensaje.
+### Acceptance criteria
+1. WHEN the score reaches 60 or more, THE SYSTEM SHALL end the call with a neutral message and mark it as blocked.
+2. WHEN the conversation ends with a score below 30 and the call needs a live answer (verified relative, legitimate urgency), THE SYSTEM SHALL ring the protected person and announce who is calling and why before connecting.
+3. WHEN the conversation ends with a score below 60 and no live answer is needed, THE SYSTEM SHALL save the message without interrupting.
+4. THE SYSTEM SHALL reach a verdict within 90 seconds of conversation; IF it hasn't, THEN it SHALL save the message.
 
-## Requisito 6 — Alerta a la familia
+## Requirement 6 — Family alert
 
-**Historia de usuario:** Como cuidadora, quiero enterarme de inmediato cuando bloquean una estafa, para llamar a mi mamá y verificar que esté bien.
+**User story:** As a caregiver, I want to know right away when a scam is blocked, so I can call my mom and check she's okay.
 
-### Criterios de aceptación
-1. CUANDO el sistema bloquee una llamada, EL SISTEMA DEBERÁ enviar en menos de 30 segundos un mensaje (SMS o WhatsApp) a los cuidadores del hogar.
-2. La alerta DEBERÁ incluir a quién suplantaron, qué pidieron, las señales detectadas y una acción concreta (por ejemplo, "llama a Andrés a su número de siempre").
-3. La alerta NO DEBERÁ incluir la palabra clave ni datos financieros.
-4. La alerta DEBERÁ incluir un enlace al detalle de la llamada en el panel familiar.
+### Acceptance criteria
+1. WHEN the system blocks a call, THE SYSTEM SHALL send a message (SMS or WhatsApp) to the household caregivers within 30 seconds.
+2. The alert SHALL include who was impersonated, what was requested, the signals detected, and one concrete action (e.g., "call Andrés on his usual number").
+3. The alert SHALL NOT include the safe word or financial data.
+4. The alert SHALL include a link to the call detail in the family dashboard.
 
-## Requisito 7 — Panel familiar
+## Requirement 7 — Family dashboard
 
-**Historia de usuario:** Como cuidadora, quiero configurar el sistema y revisar lo que pasó, para confiar en sus decisiones y corregirlas.
+**User story:** As a caregiver, I want to configure the system and review what happened, so I can trust its decisions and correct them.
 
-### Criterios de aceptación
-1. EL SISTEMA DEBERÁ ofrecer una configuración guiada de máximo 5 pasos: persona protegida, palabra clave, contactos, cuidadores, prueba.
-2. EL SISTEMA DEBERÁ mostrar el historial con fecha, número, veredicto, puntaje, señales, transcripción y grabación.
-3. CUANDO una cuidadora marque una llamada como mal clasificada, EL SISTEMA DEBERÁ guardar la corrección y agregarla al conjunto de evaluación.
-4. EL SISTEMA DEBERÁ permitir cambiar la palabra clave en cualquier momento.
+### Acceptance criteria
+1. THE SYSTEM SHALL offer a guided setup of at most 5 steps: protected person, safe word, contacts, caregivers, test call.
+2. THE SYSTEM SHALL show call history with date, number, verdict, score, signals, transcript, and recording.
+3. WHEN a caregiver marks a call as misclassified, THE SYSTEM SHALL store the correction and add it to the evaluation set.
+4. THE SYSTEM SHALL allow changing the safe word at any time.
 
-## Requisito 8 — Teléfono de la persona protegida
+## Requirement 8 — Protected person's phone
 
-**Historia de usuario:** Como persona protegida, quiero una pantalla que entienda sin ayuda, para contestar solo cuando me corresponde.
+**User story:** As a protected person, I want a screen I understand without help, so I only answer when it's meant for me.
 
-### Criterios de aceptación
-1. CUANDO el sistema timbre, LA INTERFAZ DEBERÁ mostrar quién llama, si fue verificado y el motivo, en texto de mínimo 28 px.
-2. LA INTERFAZ DEBERÁ tener un solo botón principal por pantalla, de mínimo 72 px de alto.
-3. LA INTERFAZ DEBERÁ cumplir contraste WCAG 2.2 AAA en texto principal.
-4. CUANDO haya mensajes guardados, LA INTERFAZ DEBERÁ mostrarlos con un contador grande estilo LED, como el contestador original.
+### Acceptance criteria
+1. WHEN the system rings, THE INTERFACE SHALL show who is calling, whether they were verified, and why, in text of at least 28 px.
+2. THE INTERFACE SHALL have a single primary button per screen, at least 72 px tall.
+3. THE INTERFACE SHALL meet WCAG 2.2 AAA contrast for primary text.
+4. WHEN there are saved messages, THE INTERFACE SHALL show them with a large LED-style counter, like the original answering machine.
 
-## Requisito 9 — Privacidad y seguridad
+## Requirement 9 — Privacy and security
 
-**Historia de usuario:** Como cuidadora, quiero que las grabaciones y la palabra clave estén protegidas, para no crear un nuevo riesgo.
+**User story:** As a caregiver, I want recordings and the safe word protected, so the system doesn't create a new risk.
 
-### Criterios de aceptación
-1. EL SISTEMA DEBERÁ cifrar la palabra clave con una llave gestionada (KMS) y nunca escribirla en logs ni transcripciones; en la transcripción DEBERÁ aparecer como "[palabra clave]".
-2. EL SISTEMA DEBERÁ cifrar grabaciones y transcripciones en reposo y borrarlas a los 30 días por defecto.
-3. EL SISTEMA DEBERÁ separar los datos por hogar y no permitir a un usuario leer datos de otro hogar.
-4. EL SISTEMA DEBERÁ pedir el consentimiento explícito de la persona protegida o su representante durante la configuración.
-5. CUANDO el sistema detecte en la conversación números de tarjeta, cuentas o documentos de identidad, EL SISTEMA DEBERÁ enmascararlos antes de guardar.
+### Acceptance criteria
+1. THE SYSTEM SHALL encrypt the safe word with a managed key (KMS) and never write it to logs or transcripts; transcripts SHALL show it as "[safe word]".
+2. THE SYSTEM SHALL encrypt recordings and transcripts at rest and delete them after 30 days by default.
+3. THE SYSTEM SHALL isolate data per household and SHALL NOT let a user read another household's data.
+4. THE SYSTEM SHALL require explicit consent from the protected person or their representative during setup.
+5. WHEN the system detects card numbers, account numbers, or ID numbers in the conversation, THE SYSTEM SHALL mask them before storing.
 
-## Requisito 10 — Modo jurado
+## Requirement 10 — Judge mode
 
-**Historia de usuario:** Como jurado, quiero probar After the Beep desde el navegador, para evaluarlo sin hacer una llamada internacional.
+**User story:** As a judge, I want to try After the Beep from my browser, so I can evaluate it without an international phone call.
 
-### Criterios de aceptación
-1. EL SISTEMA DEBERÁ ofrecer una página pública donde se pueda "llamar" desde el navegador con micrófono a un hogar de demostración.
-2. La página DEBERÁ mostrar en vivo la transcripción, el medidor de sospecha y las señales, con el mismo diseño del demo.
-3. La página DEBERÁ incluir 4 guiones sugeridos (nieto en apuros, falso banco, familiar verificado, cita médica) para que el jurado los actúe.
-4. El hogar de demostración DEBERÁ usar datos ficticios y su palabra clave DEBERÁ estar publicada en la página.
+### Acceptance criteria
+1. THE SYSTEM SHALL offer a public page where anyone can "call" a demo household from the browser using their microphone.
+2. The page SHALL show the live transcript, the suspicion meter, and the signals, with the same design as the demo.
+3. The page SHALL include 4 suggested scripts (grandson in trouble, fake bank, verified relative, doctor's appointment) for the judge to act out.
+4. The demo household SHALL use fictional data and its safe word SHALL be published on the page.
 
-## Requisito 11 — Rendimiento
+## Requirement 11 — Performance
 
-### Criterios de aceptación
-1. EL SISTEMA DEBERÁ responder a cada turno de quien llama con una latencia p50 menor que 1,5 s y p95 menor que 2,5 s.
-2. EL SISTEMA DEBERÁ actualizar el puntaje en la interfaz en menos de 500 ms después de cerrar el turno.
+### Acceptance criteria
+1. THE SYSTEM SHALL respond to each caller turn with p50 latency under 1.5 s and p95 under 2.5 s.
+2. THE SYSTEM SHALL update the score in the interface within 500 ms of the turn ending.
 
-## Requisito 12 — Evaluación
+## Requirement 12 — Evaluation
 
-### Criterios de aceptación
-1. EL PROYECTO DEBERÁ incluir un conjunto de evaluación de al menos 60 guiones en español (30 estafas y 30 legítimas) basados en las tipologías del IC3 y la FTC.
-2. EL SISTEMA DEBERÁ detectar al menos el 90% de las estafas del conjunto.
-3. EL SISTEMA DEBERÁ bloquear menos del 5% de las llamadas legítimas del conjunto.
-4. CUANDO cambien las reglas, los pesos o los prompts, LA EVALUACIÓN DEBERÁ ejecutarse automáticamente y reportar ambas métricas.
+### Acceptance criteria
+1. THE PROJECT SHALL include an evaluation set of at least 60 scripts (30 scams and 30 legitimate) based on IC3 and FTC typologies.
+2. THE SYSTEM SHALL detect at least 90% of the scams in the set.
+3. THE SYSTEM SHALL block fewer than 5% of the legitimate calls in the set.
+4. WHEN rules, weights, or prompts change, THE EVALUATION SHALL run automatically and report both metrics.
 
-## Anexo A — Catálogo inicial de señales
+## Appendix A — Initial signal catalog
 
-| Señal | Peso | Ejemplo |
+| Signal | Weight | Example |
 |---|---|---|
-| Dice ser un familiar desde número desconocido | +15 | "Abuela, soy yo" |
-| Suplanta a una entidad (banco, gobierno, empresa de servicios) | +15 | "Le hablamos del área de seguridad" |
-| Emergencia repentina | +15 | "Tuve un accidente" |
-| Pide dinero urgente | +20 | "Necesito cuatro millones ya" |
-| Pide código, contraseña o PIN | +35 | "Dígame el código que le llegó" |
-| Medio de pago inusual (tarjetas regalo, cripto, giro a terceros) | +25 | "Compre tarjetas de regalo" |
-| Pide guardar el secreto | +20 | "No le digas a mi mamá" |
-| Presión de tiempo | +15 | "Tiene cinco minutos" |
-| Evade preguntas simples | +15 | "Eso no importa ahora" |
-| Genera miedo o amenaza | +10 | "Va a perder la plata" |
-| No sabe la palabra clave | +30 | "¿Qué palabra?" |
-| Número nuevo de un supuesto conocido | +10 | "La llamo de uno prestado" |
-| Palabra clave correcta | −45 | "Tamarindo" |
-| No pide dinero ni datos | −15 | "Solo confirmar la cita" |
-| Ofrece un canal de verificación oficial | −10 | "Puede llamar a la línea de citas" |
+| Claims to be family from an unknown number | +15 | "Grandma, it's me" |
+| Impersonates an institution (bank, government, utility) | +15 | "This is the fraud department" |
+| Sudden emergency | +15 | "I had an accident" |
+| Asks for urgent money | +20 | "I need four thousand dollars now" |
+| Asks for a code, password, or PIN | +35 | "Read me the code we just texted you" |
+| Unusual payment method (gift cards, crypto, wire to third parties) | +25 | "Buy some gift cards" |
+| Asks to keep it secret | +20 | "Don't tell mom" |
+| Time pressure | +15 | "You have five minutes" |
+| Dodges simple questions | +15 | "That doesn't matter right now" |
+| Fear or threats | +10 | "You'll lose your money" |
+| Doesn't know the safe word | +30 | "What word?" |
+| New number for a supposed acquaintance | +10 | "I'm calling from a borrowed phone" |
+| Correct safe word | −45 | "Tamarind" |
+| Asks for no money or data | −15 | "Just confirming the appointment" |
+| Offers an official verification channel | −10 | "You can call the appointments line" |

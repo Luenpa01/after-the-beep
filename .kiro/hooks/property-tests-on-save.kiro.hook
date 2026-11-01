@@ -1,7 +1,7 @@
 {
   "enabled": false,
-  "name": "Tests de propiedades del motor de riesgo",
-  "description": "Corre los tests de propiedades al guardar cualquier archivo del motor de riesgo.",
+  "name": "Risk engine property tests",
+  "description": "Runs the property tests whenever a risk-engine file is saved.",
   "version": "1",
   "when": {
     "type": "fileEdited",
@@ -9,6 +9,6 @@
   },
   "then": {
     "type": "askAgent",
-    "prompt": "Ejecuta `npm test -w packages/risk-engine`. Si falla alguna propiedad, muestra el contraejemplo mínimo de fast-check y explica qué requisito de requirements.md se rompe."
+    "prompt": "Run `npm test -w packages/risk-engine`. If a property fails, show fast-check's minimal counterexample and explain which requirement in requirements.md it breaks."
   }
 }
