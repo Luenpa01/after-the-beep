@@ -33,11 +33,16 @@ export function levenshtein(a: string, b: string): number {
 }
 
 /**
- * Returns true if any word in `normalizedSpoken` matches `safeWord`
- * within the Levenshtein tolerance: floor(len / 6) (Req 3.2).
+ * Returns true if any window of consecutive words in `normalizedSpoken`
+ * matches `safeWord` within the Levenshtein tolerance: floor(len / 6)
+ * (Req 3.2).
  *
- * Both the spoken text (already normalized by the caller) and the safe word
- * (raw, from HouseholdContext) are normalized before comparison.
+ * The window size equals the word count of the normalized safe word, so
+ * multi-word safe words ("gato negro") are compared against every window
+ * of the same length. Single-word safe words fall back to per-word checking.
+ *
+ * `normalizedSpoken` is already normalized by the caller; `safeWord` is the
+ * raw value from HouseholdContext and is normalized here.
  */
 export function safeWordMatch(normalizedSpoken: string, safeWord: string): boolean {
   const target = normalize(safeWord);
@@ -45,9 +50,12 @@ export function safeWordMatch(normalizedSpoken: string, safeWord: string): boole
 
   const tolerance = Math.floor(target.length / 6);
   const words = normalizedSpoken.split(/\s+/).filter((w) => w.length > 0);
+  const targetWords = target.split(/\s+/).filter((w) => w.length > 0);
+  const windowSize = targetWords.length;
 
-  for (const word of words) {
-    if (levenshtein(word, target) <= tolerance) {
+  for (let i = 0; i + windowSize <= words.length; i++) {
+    const window = words.slice(i, i + windowSize).join(" ");
+    if (levenshtein(window, target) <= tolerance) {
       return true;
     }
   }
@@ -56,9 +64,12 @@ export function safeWordMatch(normalizedSpoken: string, safeWord: string): boole
 }
 
 /**
- * Replaces any word in `text` that matches `safeWord` within the Levenshtein
- * tolerance with "[safe word]". The safe word must never appear in evidence,
- * signals, or any engine output (Req 3.4, Req 9.1).
+ * Replaces any window of consecutive words in `text` that matches `safeWord`
+ * within the Levenshtein tolerance with "[safe word]". Handles multi-word
+ * safe words by sliding a window of the same word count over the text.
+ *
+ * The safe word must never appear in evidence, signals, or any engine output
+ * (Req 3.4, Req 9.1).
  */
 export function maskSafeWord(text: string, safeWord: string): string {
   if (!safeWord) return text;
@@ -66,16 +77,62 @@ export function maskSafeWord(text: string, safeWord: string): string {
   if (!target) return text;
 
   const tolerance = Math.floor(target.length / 6);
+  const targetWords = target.split(/\s+/).filter((w) => w.length > 0);
+  const windowSize = targetWords.length;
 
-  return text
-    .split(/(\s+)/)
-    .map((token) => {
-      if (/^\s*$/.test(token)) return token;
-      const normalizedToken = normalize(token);
-      if (normalizedToken && levenshtein(normalizedToken, target) <= tolerance) {
-        return "[safe word]";
+  // Split keeping whitespace tokens for reconstruction.
+  const tokens = text.split(/(\s+)/);
+
+  // Indices of non-whitespace tokens.
+  const wordIdxs: number[] = [];
+  for (let i = 0; i < tokens.length; i++) {
+    if (tokens[i].length > 0 && !/^\s+$/.test(tokens[i])) {
+      wordIdxs.push(i);
+    }
+  }
+
+  // Track which token indices are part of a matched window.
+  const masked = new Set<number>();
+
+  for (let i = 0; i + windowSize <= wordIdxs.length; i++) {
+    // Skip if any token in this window is already masked.
+    let alreadyMasked = false;
+    for (let j = 0; j < windowSize; j++) {
+      if (masked.has(wordIdxs[i + j])) {
+        alreadyMasked = true;
+        break;
       }
-      return token;
-    })
-    .join("");
+    }
+    if (alreadyMasked) continue;
+
+    const windowWords: string[] = [];
+    for (let j = 0; j < windowSize; j++) {
+      windowWords.push(normalize(tokens[wordIdxs[i + j]]));
+    }
+    const window = windowWords.join(" ");
+
+    if (levenshtein(window, target) <= tolerance) {
+      // Mark all tokens in the window, including whitespace between words.
+      const start = wordIdxs[i];
+      const end = wordIdxs[i + windowSize - 1];
+      for (let k = start; k <= end; k++) {
+        masked.add(k);
+      }
+    }
+  }
+
+  // Build result, collapsing each masked run into "[safe word]".
+  const result: string[] = [];
+  let i = 0;
+  while (i < tokens.length) {
+    if (masked.has(i)) {
+      while (i < tokens.length && masked.has(i)) i++;
+      result.push("[safe word]");
+    } else {
+      result.push(tokens[i]);
+      i++;
+    }
+  }
+
+  return result.join("");
 }
