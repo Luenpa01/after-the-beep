@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>El Contestador · demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Doto:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --page:#E4DEEC; --ink:#231A31; --ink-soft:#5A4E6B; --panel:#F4F0F8; --line:#CBC2D8;
+  --plastic:#DCD2BF; --plastic-hi:#EAE2D2; --plastic-edge:#B3A78F; --plastic-deep:#8C8069;
+  --on-plastic:#2E2721; --smoke:#26211C; --led:#FF3B2F; --amber:#FFB547; --jade:#22A37A;
+  --danger-bg:#FBE3E1; --danger-ink:#9B1C14; --safe-bg:#DDF3EA; --safe-ink:#11694C;
+  --glow:rgba(122,92,180,.18);
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --page:#1A1528; --ink:#EEE7F6; --ink-soft:#AA9DBE; --panel:#241D35; --line:#3B3152;
+    --plastic:#CDC3AF; --plastic-hi:#DDD4C2; --plastic-edge:#A3977F; --plastic-deep:#7A6F5A;
+    --danger-bg:#3A1B22; --danger-ink:#FF9C93; --safe-bg:#15342C; --safe-ink:#7FE3BF;
+    --glow:rgba(150,110,230,.22);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --page:#1A1528; --ink:#EEE7F6; --ink-soft:#AA9DBE; --panel:#241D35; --line:#3B3152;
+  --plastic:#CDC3AF; --plastic-hi:#DDD4C2; --plastic-edge:#A3977F; --plastic-deep:#7A6F5A;
+  --danger-bg:#3A1B22; --danger-ink:#FF9C93; --safe-bg:#15342C; --safe-ink:#7FE3BF;
+  --glow:rgba(150,110,230,.22);
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;min-height:100%;
+  background:radial-gradient(circle at 85% -5%, var(--glow), transparent 45%) , var(--page);
+  color:var(--ink);
+  font-family:"Bricolage Grotesque", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size:17px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:560px;margin:0 auto;padding:28px 18px 56px}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--amber);outline-offset:3px;border-radius:8px}
+
+/* Intro */
+.intro h1{
+  font-family:"Doto", "Bricolage Grotesque", monospace;
+  font-weight:900;font-size:clamp(40px,11vw,58px);line-height:.95;
+  letter-spacing:-.01em;margin:0 0 12px;
+}
+.intro p{margin:0;color:var(--ink-soft);max-width:34ch;font-size:18px}
+.toolbar{display:flex;gap:8px;margin:18px 0 26px}
+.chipbtn{
+  border:1.5px solid var(--line);background:var(--panel);border-radius:999px;
+  padding:6px 14px;font-size:15px;cursor:pointer;
+}
+.chipbtn[aria-pressed="true"]{border-color:var(--ink);font-weight:600}
+
+/* Machine */
+.machine{
+  position:relative;
+  background:linear-gradient(180deg,var(--plastic-hi),var(--plastic) 30%,var(--plastic) 80%,var(--plastic-edge));
+  border-radius:22px 22px 30px 30px;
+  padding:16px 16px 20px;
+  color:var(--on-plastic);
+  box-shadow:0 2px 0 var(--plastic-hi) inset, 0 -6px 0 var(--plastic-deep) inset, 0 18px 40px rgba(20,10,30,.35);
+}
+.plate{display:flex;justify-content:space-between;align-items:baseline;margin:0 4px 12px}
+.plate b{font-family:"Doto",monospace;font-weight:900;font-size:20px;font-style:italic}
+.plate span{font-size:13px;opacity:.7}
+.deck{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:stretch}
+.window{
+  background:var(--smoke);border-radius:12px;padding:8px;
+  box-shadow:0 3px 8px rgba(0,0,0,.45) inset;
+}
+.window svg{display:block;width:100%;height:auto}
+.reel{transform-box:fill-box;transform-origin:center}
+.recording .reel{animation:spin 1.6s linear infinite}
+.recording .reel.r2{animation-duration:1.1s}
+@keyframes spin{to{transform:rotate(360deg)}}
+#ghost{opacity:0;transition:opacity .6s ease}
+.caught #ghost{opacity:1;animation:float 2.4s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-3px)}}
+
+.counter{
+  background:var(--smoke);border-radius:12px;padding:8px 12px;min-width:104px;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;
+  box-shadow:0 3px 8px rgba(0,0,0,.45) inset;
+}
+.counter output{
+  font-family:"Doto",monospace;font-weight:900;font-size:46px;line-height:1;
+  color:var(--led);text-shadow:0 0 10px rgba(255,59,47,.7);
+}
+.counter small{color:#D8C9B0;font-size:12px;text-align:center;line-height:1.2;margin-top:4px}
+
+.status{display:flex;align-items:center;gap:10px;margin:14px 4px 6px;font-weight:600;font-size:15px}
+.lamp{width:12px;height:12px;border-radius:50%;background:#6E6556;box-shadow:0 0 0 2px var(--plastic-deep)}
+.lamp.on{background:var(--led);box-shadow:0 0 10px var(--led),0 0 0 2px var(--plastic-deep)}
+.lamp.blink{animation:blink .5s steps(2) infinite}
+.lamp.safe{background:var(--jade);box-shadow:0 0 10px var(--jade),0 0 0 2px var(--plastic-deep)}
+@keyframes blink{50%{opacity:.2}}
+
+.meter{
+  background:linear-gradient(180deg,#F7EED9,#EADFC4);border-radius:12px;padding:8px 8px 4px;margin:10px 0 12px;
+  box-shadow:0 2px 6px rgba(0,0,0,.25) inset;
+}
+.meter svg{display:block;width:100%;height:auto}
+
+.vfd{
+  background:var(--smoke);border-radius:12px;padding:12px 14px;min-height:150px;max-height:260px;overflow-y:auto;
+  color:var(--amber);font-size:15.5px;line-height:1.45;
+  box-shadow:0 3px 8px rgba(0,0,0,.5) inset;
+}
+.vfd .line{margin:0 0 8px}
+.vfd .who{display:block;font-size:12.5px;color:#C99A55;margin-bottom:1px}
+.vfd .line.caller{color:#FFD9A0}
+.vfd .line.machine{color:#9FE7CB}
+.vfd .line.machine .who{color:#6FBFA2}
+.vfd .empty{color:#A88D66}
+
+.signals{display:flex;flex-wrap:wrap;gap:6px;min-height:30px;margin-top:12px}
+.sig{
+  font-size:13.5px;padding:4px 10px;border-radius:7px;font-weight:600;
+  background:#F5D9D5;color:#7E1810;border:1px solid #E3A9A2;
+}
+.sig.good{background:#D3EFE3;color:#0E5C42;border-color:#9ED6BF}
+
+/* Callers */
+h2{font-size:22px;line-height:1.2;margin:34px 0 4px;font-weight:800}
+.sub{margin:0 0 14px;color:var(--ink-soft);font-size:16px}
+.callers{display:grid;gap:10px}
+.caller{
+  display:grid;grid-template-columns:8px 1fr;gap:12px;align-items:stretch;
+  text-align:left;background:var(--panel);border:1.5px solid var(--line);border-radius:12px;
+  padding:12px 14px 12px 10px;cursor:pointer;
+}
+.caller::before{content:"";border-radius:4px;background:var(--tab)}
+.caller strong{display:block;font-size:17px;line-height:1.3}
+.caller span{display:block;color:var(--ink-soft);font-size:14.5px}
+.caller:hover:not(:disabled){border-color:var(--ink-soft)}
+.caller:disabled{opacity:.5;cursor:not-allowed}
+.caller.done{border-style:dashed}
+
+/* Verdict */
+.verdict{margin-top:22px;border-radius:14px;padding:16px;border:1.5px solid var(--line);background:var(--panel)}
+.verdict[hidden]{display:none}
+.verdict.block{background:var(--danger-bg);border-color:transparent}
+.verdict.ring,.verdict.message{background:var(--safe-bg);border-color:transparent}
+.verdict h3{margin:0 0 4px;font-size:21px}
+.verdict.block h3{color:var(--danger-ink)}
+.verdict.ring h3,.verdict.message h3{color:var(--safe-ink)}
+.verdict p{margin:0 0 12px}
+.sms{background:var(--panel);border-radius:16px 16px 16px 4px;padding:10px 14px;max-width:44ch;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.sms small{display:block;color:var(--ink-soft);font-size:13px;margin-bottom:2px}
+
+/* How + data */
+.steps{margin:0;padding:0;list-style:none;counter-reset:s}
+.steps li{counter-increment:s;display:grid;grid-template-columns:34px 1fr;gap:10px;margin-bottom:12px}
+.steps li::before{
+  content:counter(s);font-family:"Doto",monospace;font-weight:900;font-size:26px;line-height:1;color:var(--led);
+}
+.steps b{display:block}
+.data{border-left:4px solid var(--led);padding:2px 0 2px 14px;margin:8px 0 0}
+.data p{margin:0 0 6px}
+.data .big{font-family:"Doto",monospace;font-weight:900;font-size:40px;line-height:1.05}
+.src{color:var(--ink-soft);font-size:14px}
+footer{margin-top:36px;color:var(--ink-soft);font-size:14px}
+
+@media (prefers-reduced-motion:reduce){
+  .recording .reel,.lamp.blink,.caught #ghost{animation:none}
+  #ghost{transition:none}
+}
+@media (max-width:360px){.counter output{font-size:38px}.counter{min-width:88px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="intro">
+  <h1>El Contestador</h1>
+  <p>Atiende las llamadas de la abuela antes que ella. Si es una estafa, su teléfono nunca timbra.</p>
+</header>
+
+<div class="toolbar">
+  <button class="chipbtn" id="soundBtn" aria-pressed="true">Sonido</button>
+  <button class="chipbtn" id="voiceBtn" aria-pressed="false">Leer en voz alta</button>
+  <button class="chipbtn" id="themeBtn">Cambiar tema</button>
+</div>
+
+<section class="machine" id="machine" aria-label="Contestador de Doña Gloria">
+  <div class="plate"><b>El Contestador</b><span>Modelo KR-87</span></div>
+  <div class="deck">
+    <div class="window">
+      <svg viewBox="0 0 220 120" aria-hidden="true">
+        <rect x="4" y="4" width="212" height="112" rx="10" fill="#3B342D" stroke="#574E43" stroke-width="2"/>
+        <rect x="18" y="12" width="184" height="30" rx="4" fill="#EFE6D2"/>
+        <text id="tapeLabel" x="110" y="32" text-anchor="middle" font-family="Bricolage Grotesque, sans-serif" font-size="12" font-weight="600" fill="#3A3128">Llamadas de Doña Gloria</text>
+        <rect x="40" y="50" width="140" height="48" rx="24" fill="#1B1714"/>
+        <path d="M58 98 L162 98" stroke="#5B3A22" stroke-width="5"/>
+        <g class="reel r1">
+          <circle cx="70" cy="74" r="20" fill="#5B3A22"/>
+          <circle cx="70" cy="74" r="9" fill="#EFE6D2"/>
+          <path d="M70 65 v-4 M78 78 l3 2 M62 78 l-3 2" stroke="#1B1714" stroke-width="3" stroke-linecap="round"/>
+        </g>
+        <g class="reel r2">
+          <circle cx="150" cy="74" r="14" fill="#5B3A22"/>
+          <circle cx="150" cy="74" r="9" fill="#EFE6D2"/>
+          <path d="M150 65 v-4 M158 78 l3 2 M142 78 l-3 2" stroke="#1B1714" stroke-width="3" stroke-linecap="round"/>
+        </g>
+        <g id="ghost">
+          <path d="M110 56 c-10 0 -15 8 -15 17 v19 l5 -4 5 4 5 -4 5 4 5 -4 5 4 v-19 c0 -9 -5 -17 -15 -17z" fill="#F4F0FF" opacity=".95"/>
+          <circle cx="105" cy="72" r="2.4" fill="#1B1714"/><circle cx="115" cy="72" r="2.4" fill="#1B1714"/>
+          <ellipse cx="110" cy="80" rx="2.6" ry="3.4" fill="#1B1714"/>
+        </g>
+      </svg>
+    </div>
+    <div class="counter">
+      <output id="count" aria-label="Fantasmas atrapados">0</output>
+      <small>fantasmas<br>atrapados</small>
+    </div>
+  </div>
+
+  <div class="status"><span class="lamp" id="lamp"></span><span id="statusText">En espera. Elige quién llama.</span></div>
+
+  <div class="meter">
+    <svg viewBox="0 0 240 128" role="img" aria-labelledby="meterTitle">
+      <title id="meterTitle">Nivel de sospecha de la llamada</title>
+      <path d="M33.4 75 A100 100 0 0 1 120 25" fill="none" stroke="#2E2721" stroke-width="3"/>
+      <path d="M120 25 A100 100 0 0 1 172.3 39.8" fill="none" stroke="#2E2721" stroke-width="3"/>
+      <path d="M172.3 39.8 A100 100 0 0 1 206.6 75" fill="none" stroke="#D2261B" stroke-width="7"/>
+      <g stroke="#2E2721" stroke-width="2">
+        <line x1="33.4" y1="75" x2="41.2" y2="79.5"/><line x1="54.9" y1="49.1" x2="61.1" y2="55.5"/>
+        <line x1="85.8" y1="31" x2="88.6" y2="39.4"/><line x1="120" y1="25" x2="120" y2="34"/>
+        <line x1="154.2" y1="31" x2="151.4" y2="39.4"/><line x1="185.1" y1="49.1" x2="178.9" y2="55.5"/>
+        <line x1="206.6" y1="75" x2="198.8" y2="79.5"/>
+      </g>
+      <text x="22" y="98" font-family="Bricolage Grotesque, sans-serif" font-size="13" font-weight="600" fill="#2E2721">Confiable</text>
+      <text x="218" y="98" text-anchor="end" font-family="Bricolage Grotesque, sans-serif" font-size="13" font-weight="800" fill="#B81E14">Estafa</text>
+      <text x="120" y="116" text-anchor="middle" font-family="Bricolage Grotesque, sans-serif" font-size="11.5" fill="#5A5044">Nivel de sospecha</text>
+      <line id="needle" x1="120" y1="125" x2="120" y2="32" stroke="#1B1714" stroke-width="2.5" stroke-linecap="round" transform="rotate(-60 120 125)"/>
+      <circle cx="120" cy="125" r="7" fill="#2E2721"/>
+    </svg>
+  </div>
+
+  <div class="vfd" id="vfd" role="log" aria-live="polite" aria-label="Transcripción de la llamada">
+    <p class="empty">Aquí aparece la conversación entre quien llama y el contestador.</p>
+  </div>
+  <div class="signals" id="signals" aria-live="polite"></div>
+</section>
+
+<section class="verdict" id="verdict" hidden aria-live="polite"></section>
+
+<h2>¿Quién llama?</h2>
+<p class="sub">Cuatro llamadas reales en su forma. Dos son estafas.</p>
+<div class="callers" id="callers"></div>
+
+<h2>Cómo decide</h2>
+<ol class="steps">
+  <li><div><b>Atiende primero</b>Toda llamada de un número que no está en los contactos pasa por el contestador. Avisa que es un asistente y que la llamada queda grabada.</div></li>
+  <li><div><b>Verifica</b>Si dicen ser familia, pide la palabra clave que la familia acordó. Una voz clonada suena igual, pero no sabe la palabra.</div></li>
+  <li><div><b>Decide</b>Suma señales de estafa en vivo: urgencia, secreto, códigos, pagos raros. Si cruza el umbral, bloquea y avisa a la familia; si no, timbra o guarda el mensaje.</div></li>
+</ol>
+
+<h2>Por qué importa</h2>
+<div class="data">
+  <p class="big">$7.748 millones</p>
+  <p>Es lo que los mayores de 60 años en Estados Unidos reportaron haber perdido por fraude en 2025, en 201.266 denuncias. Es 59% más que en 2024, y la pérdida promedio fue de $38.500 por persona.</p>
+  <p class="src">Fuente: FBI, Internet Crime Complaint Center, informe anual 2025.</p>
+</div>
+
+<footer>Demo de concepto para Kiroween 2026. Las llamadas son simuladas.</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var GREETING = "Hola, habla el contestador de Doña Gloria. Esta llamada la atiende un asistente y queda grabada. ¿Quién la llama y para qué?";
+
+  var SCENARIOS = [
+    {
+      id:"nieto", tab:"#D2261B", title:"“Abuela, soy Andrés”", hint:"Número desconocido. Suena igualito al nieto.",
+      number:"+57 312 ••• 0419", caller:"Dice ser Andrés",
+      steps:[
+        {who:"caller",text:"¡Abuela! Soy yo, Andrés. Tuve un accidente con la moto y estoy en la estación de policía.",sig:[["Dice ser un familiar",15],["Emergencia repentina",15]]},
+        {who:"machine",text:"Andrés, para pasarte con tu abuela necesito la palabra clave de la familia."},
+        {who:"caller",text:"¿Qué palabra? Abuela, no hay tiempo. Necesito que me consigas cuatro millones ya.",sig:[["No sabe la palabra clave",30],["Pide dinero urgente",20]]},
+        {who:"caller",text:"Y por favor no le digas nada a mi mamá, ¿sí?",sig:[["Pide guardar el secreto",20]]},
+        {who:"machine",text:"Entendido. Le dejo el mensaje a la familia."}
+      ],
+      verdict:"block",
+      sms:"Bloqueé una llamada de un número desconocido que decía ser Andrés y pedía $4.000.000. No supo la palabra clave. Llámalo a su número de siempre para confirmar que está bien."
+    },
+    {
+      id:"banco", tab:"#D2261B", title:"“Área de seguridad de su banco”", hint:"Dice que hay una compra rara en su cuenta.",
+      number:"+57 601 ••• 8800", caller:"Dice ser del banco",
+      steps:[
+        {who:"caller",text:"Buenas tardes, le hablamos del área de seguridad de su banco. Detectamos una compra sospechosa por 2.300.000 pesos.",sig:[["Suplanta a una entidad",15],["Genera miedo",10]]},
+        {who:"machine",text:"¿Me confirma el nombre del banco y el número del caso?"},
+        {who:"caller",text:"Eso no importa ahora. Para bloquear la compra, dígame el código que le acaba de llegar por mensaje.",sig:[["Pide un código de verificación",35],["Evade preguntas simples",15]]},
+        {who:"caller",text:"Tiene cinco minutos o pierde la plata.",sig:[["Presión de tiempo",15]]},
+        {who:"machine",text:"Los bancos nunca piden ese código por teléfono. Si la llamada es real, Doña Gloria llamará al número de su tarjeta."}
+      ],
+      verdict:"block",
+      sms:"Bloqueé una llamada que se hizo pasar por el banco y pidió el código que llega por mensaje. Doña Gloria no compartió nada. Revisen juntas los movimientos en la app del banco."
+    },
+    {
+      id:"hija", tab:"#22A37A", title:"“Mami, se me dañó el celular”", hint:"Número nuevo. Dice ser Camila, la hija.",
+      number:"+57 315 ••• 2277", caller:"Dice ser Camila",
+      steps:[
+        {who:"caller",text:"Hola, soy Camila, la hija de Gloria. Se me dañó el celular y la llamo de uno prestado.",sig:[["Dice ser un familiar",15],["Número nuevo",10]]},
+        {who:"machine",text:"Hola, Camila. Para pasarte, dime la palabra clave de la familia."},
+        {who:"caller",text:"Tamarindo. Era para decirle que paso por ella a las 4 para la cita.",sig:[["Palabra clave correcta",-45]]},
+        {who:"machine",text:"Gracias, Camila. Ya le timbro a tu mamá."}
+      ],
+      verdict:"ring",
+      sms:"Le llama Camila desde un número prestado. Ya dijo la palabra clave. Pasa por usted a las 4 para la cita."
+    },
+    {
+      id:"clinica", tab:"#22A37A", title:"“Le llamamos de la clínica”", hint:"Quieren confirmar una cita médica.",
+      number:"+57 604 ••• 1000", caller:"Dice ser de la clínica",
+      steps:[
+        {who:"caller",text:"Buenos días, le hablamos de la Clínica del Norte para confirmar la cita de Doña Gloria el jueves a las 10:30 con medicina interna.",sig:[["Llamada institucional",5]]},
+        {who:"machine",text:"¿Necesita algún pago o algún dato de la paciente?"},
+        {who:"caller",text:"No señora, solo confirmar. Si no puede asistir, llama a la línea de citas.",sig:[["No pide dinero ni datos",-15]]},
+        {who:"machine",text:"Perfecto. Le dejo el mensaje a Doña Gloria sin interrumpirla."}
+      ],
+      verdict:"message",
+      sms:"Recordatorio: cita el jueves a las 10:30 con medicina interna en la Clínica del Norte. No pidieron pagos ni datos."
+    }
+  ];
+
+  var $ = function(id){ return document.getElementById(id); };
+  var machine=$("machine"), vfd=$("vfd"), signals=$("signals"), lamp=$("lamp"), statusText=$("statusText"),
+      needle=$("needle"), verdictEl=$("verdict"), countEl=$("count"), callersEl=$("callers"), tapeLabel=$("tapeLabel");
+  var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var soundOn = true, voiceOn = false, busy = false, caught = 0, score = 10, needleAngle = -60;
+
+  /* ---------- Audio ---------- */
+  var ctx = null;
+  function audio(){
+    if(!soundOn) return null;
+    try{
+      if(!ctx){ var AC = window.AudioContext || window.webkitAudioContext; if(!AC) return null; ctx = new AC(); }
+      if(ctx.state === "suspended") ctx.resume();
+      return ctx;
+    }catch(e){ return null; }
+  }
+  function tone(freqs, start, dur, vol, type){
+    var a = audio(); if(!a) return;
+    var g = a.createGain(); g.connect(a.destination);
+    var t0 = a.currentTime + start;
+    g.gain.setValueAtTime(0, t0);
+    g.gain.linearRampToValueAtTime(vol, t0 + 0.02);
+    g.gain.setValueAtTime(vol, t0 + dur - 0.04);
+    g.gain.linearRampToValueAtTime(0, t0 + dur);
+    freqs.forEach(function(f){
+      var o = a.createOscillator(); o.type = type || "sine"; o.frequency.value = f;
+      o.connect(g); o.start(t0); o.stop(t0 + dur + 0.02);
+    });
+  }
+  function ring(){ tone([440,480],0,0.9,0.06); tone([440,480],1.3,0.9,0.06); }
+  function beep(){ tone([1000],0,0.45,0.07); }
+  function trapSound(){ tone([330],0,0.18,0.07,"square"); tone([247],0.2,0.18,0.07,"square"); tone([185],0.4,0.4,0.07,"square"); }
+  function okSound(){ tone([660],0,0.15,0.06); tone([880],0.17,0.25,0.06); }
+
+  /* ---------- Speech (optional) ---------- */
+  function speak(text, who){
+    return new Promise(function(resolve){
+      if(!voiceOn || !("speechSynthesis" in window)){ resolve(); return; }
+      try{
+        var u = new SpeechSynthesisUtterance(text);
+        u.lang = "es-CO"; u.rate = 1.05; u.pitch = who === "machine" ? 0.8 : 1.15;
+        var done = false; var fin = function(){ if(!done){ done = true; resolve(); } };
+        u.onend = fin; u.onerror = fin;
+        setTimeout(fin, 12000);
+        window.speechSynthesis.speak(u);
+      }catch(e){ resolve(); }
+    });
+  }
+
+  /* ---------- Helpers ---------- */
+  function wait(ms){ return new Promise(function(r){ setTimeout(r, reduced ? Math.min(ms, 150) : ms); }); }
+  function setStatus(text, mode){
+    statusText.textContent = text;
+    lamp.className = "lamp" + (mode ? " " + mode : "");
+  }
+  function animateNeedle(target){
+    if(reduced){ needleAngle = target; needle.setAttribute("transform","rotate("+target+" 120 125)"); return; }
+    var from = needleAngle, start = null, dur = 700;
+    function step(ts){
+      if(start === null) start = ts;
+      var p = Math.min(1,(ts-start)/dur);
+      var e = 1 - Math.pow(1-p,3);
+      var wobble = p < 1 ? Math.sin(p*18)*(1-p)*3 : 0;
+      needleAngle = from + (target-from)*e + wobble;
+      needle.setAttribute("transform","rotate("+needleAngle.toFixed(2)+" 120 125)");
+      if(p < 1) requestAnimationFrame(step); else needleAngle = target;
+    }
+    requestAnimationFrame(step);
+  }
+  function setScore(s){
+    score = Math.max(0, Math.min(100, s));
+    animateNeedle(-60 + score*1.2);
+  }
+  function addSignal(label, weight){
+    var el = document.createElement("span");
+    el.className = "sig" + (weight < 0 ? " good" : "");
+    el.textContent = label + (weight < 0 ? " " + weight : " +" + weight);
+    signals.appendChild(el);
+  }
+  function typeLine(who, text, label){
+    return new Promise(function(resolve){
+      var p = document.createElement("p"); p.className = "line " + who;
+      var w = document.createElement("span"); w.className = "who"; w.textContent = label;
+      var t = document.createElement("span");
+      p.appendChild(w); p.appendChild(t); vfd.appendChild(p);
+      if(reduced){ t.textContent = text; vfd.scrollTop = vfd.scrollHeight; resolve(); return; }
+      var i = 0;
+      (function tick(){
+        i += 2; t.textContent = text.slice(0,i);
+        vfd.scrollTop = vfd.scrollHeight;
+        if(i < text.length) setTimeout(tick, 22); else resolve();
+      })();
+    });
+  }
+  async function say(who, text, label){
+    await Promise.all([typeLine(who, text, label), speak(text, who)]);
+  }
+  function lockCallers(state){
+    Array.prototype.forEach.call(callersEl.querySelectorAll("button"), function(b){ b.disabled = state; });
+  }
+
+  /* ---------- Verdict ---------- */
+  function showVerdict(sc){
+    var v = sc.verdict, html = "";
+    if(v === "block"){
+      html = "<h3>Llamada bloqueada</h3><p>Doña Gloria nunca escuchó el timbre. El contestador le escribió a Camila:</p>" +
+             "<div class=\"sms\"><small>Mensaje para Camila</small>" + sc.sms + "</div>";
+    }else if(v === "ring"){
+      html = "<h3>Timbrando a Doña Gloria</h3><p>Pasó la verificación. Así le anuncia la llamada el contestador:</p>" +
+             "<div class=\"sms\"><small>Anuncio para Doña Gloria</small>" + sc.sms + "</div>";
+    }else{
+      html = "<h3>Mensaje guardado</h3><p>Llamada legítima y sin urgencia, así que no la interrumpió. Lo escucha cuando quiera:</p>" +
+             "<div class=\"sms\"><small>Mensaje para Doña Gloria</small>" + sc.sms + "</div>";
+    }
+    verdictEl.className = "verdict " + v;
+    verdictEl.innerHTML = html;
+    verdictEl.hidden = false;
+  }
+
+  /* ---------- Play a call ---------- */
+  async function play(sc, btn){
+    if(busy) return;
+    busy = true; lockCallers(true);
+    if(window.speechSynthesis){ try{ window.speechSynthesis.cancel(); }catch(e){} }
+    vfd.innerHTML = ""; signals.innerHTML = ""; verdictEl.hidden = true;
+    machine.classList.remove("caught");
+    tapeLabel.textContent = "Llamadas de Doña Gloria";
+    setScore(10);
+    machine.scrollIntoView({behavior: reduced ? "auto" : "smooth", block:"start"});
+
+    setStatus("Entrante: " + sc.number, "on blink");
+    ring(); await wait(2400);
+
+    setStatus("Atendiendo. Doña Gloria no oye nada todavía.", "on");
+    machine.classList.add("recording");
+    await say("machine", GREETING, "Contestador");
+    beep(); await wait(600);
+
+    for(var i=0;i<sc.steps.length;i++){
+      var st = sc.steps[i];
+      await say(st.who, st.text, st.who === "machine" ? "Contestador" : sc.caller + " · " + sc.number);
+      if(st.sig){
+        var s = score;
+        for(var j=0;j<st.sig.length;j++){ addSignal(st.sig[j][0], st.sig[j][1]); s += st.sig[j][1]; }
+        setScore(s);
+      }
+      await wait(700);
+    }
+
+    machine.classList.remove("recording");
+    if(sc.verdict === "block"){
+      caught++; countEl.textContent = caught;
+      machine.classList.add("caught");
+      tapeLabel.textContent = "Fantasma atrapado";
+      setStatus("Bloqueada. Avisamos a la familia.", "on");
+      trapSound();
+    }else if(sc.verdict === "ring"){
+      setStatus("Verificada. Timbrando a Doña Gloria.", "safe blink");
+      okSound();
+    }else{
+      setStatus("Mensaje guardado sin interrumpir.", "safe");
+      okSound();
+    }
+    showVerdict(sc);
+    btn.classList.add("done");
+    busy = false; lockCallers(false);
+  }
+
+  /* ---------- Build caller list ---------- */
+  SCENARIOS.forEach(function(sc){
+    var b = document.createElement("button");
+    b.className = "caller"; b.type = "button";
+    b.style.setProperty("--tab", "var(--line)");
+    b.innerHTML = "<div><strong>" + sc.title + "</strong><span>" + sc.number + ". " + sc.hint + "</span></div>";
+    b.addEventListener("click", function(){ audio(); play(sc, b); });
+    callersEl.appendChild(b);
+  });
+
+  /* ---------- Toolbar ---------- */
+  $("soundBtn").addEventListener("click", function(){
+    soundOn = !soundOn; this.setAttribute("aria-pressed", String(soundOn));
+  });
+  $("voiceBtn").addEventListener("click", function(){
+    voiceOn = !voiceOn; this.setAttribute("aria-pressed", String(voiceOn));
+    if(!voiceOn && window.speechSynthesis){ try{ window.speechSynthesis.cancel(); }catch(e){} }
+  });
+  var root = document.documentElement;
+  try{ var saved = localStorage.getItem("contestador-theme"); if(saved) root.setAttribute("data-theme", saved); }catch(e){}
+  $("themeBtn").addEventListener("click", function(){
+    var current = root.getAttribute("data-theme") ||
+      (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    var next = current === "dark" ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    try{ localStorage.setItem("contestador-theme", next); }catch(e){}
+  });
+})();
+</script>
+</body>
+</html>

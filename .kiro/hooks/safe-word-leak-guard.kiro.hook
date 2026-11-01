@@ -1,0 +1,14 @@
+{
+  "enabled": false,
+  "name": "Guardia de la palabra clave",
+  "description": "Revisa que ningún cambio escriba la palabra clave en logs, transcripciones, prompts o alertas.",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": ["apps/**/*.ts", "apps/**/*.tsx", "prompts/**/*.md"]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Revisa el archivo editado. Si alguna variable relacionada con la palabra clave (safeWord, safeWordPlain o similares) llega a un logger, a una transcripción persistida, a un prompt o a una alerta, señálalo con la línea exacta y propone la corrección, según el requisito 9.1."
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "enabled": false,
+  "name": "Tests de propiedades del motor de riesgo",
+  "description": "Corre los tests de propiedades al guardar cualquier archivo del motor de riesgo.",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": ["packages/risk-engine/src/**/*.ts"]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Ejecuta `npm test -w packages/risk-engine`. Si falla alguna propiedad, muestra el contraejemplo mínimo de fast-check y explica qué requisito de requirements.md se rompe."
+  }
+}

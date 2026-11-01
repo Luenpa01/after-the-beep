@@ -1,0 +1,14 @@
+{
+  "enabled": false,
+  "name": "Evaluar al cambiar reglas o prompts",
+  "description": "Ejecuta el conjunto de evaluación cuando cambian las reglas del motor de riesgo o los prompts, y reporta detección y falsos positivos.",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": ["packages/risk-engine/src/rules/**/*.ts", "prompts/**/*.md"]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Ejecuta `npm run eval`. Reporta el porcentaje de estafas detectadas y de llamadas legítimas bloqueadas. Si la detección baja de 90% o los falsos positivos superan 5%, muestra los guiones que fallaron y propone el ajuste mínimo de pesos o reglas, sin aplicarlo."
+  }
+}
