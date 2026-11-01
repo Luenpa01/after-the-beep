@@ -1,5 +1,5 @@
 import type { HouseholdContext, SignalId } from "./types";
-import { normalize } from "./text";
+import { safeWordMatch } from "./levenshtein";
 
 /**
  * Detection function: receives the normalized text, the raw text, and the
@@ -31,17 +31,19 @@ function regex(pattern: RegExp): DetectFn {
   };
 }
 
-/** Detects the household safe word in the caller's text. */
+/**
+ * Detects the safe word using Levenshtein distance ≤ floor(len/6) (Req 3.2).
+ * Evidence is always "[safe word]" — the actual word is never exposed
+ * in signals, evidence, or any output (Req 3.4, Req 9.1).
+ */
 function detectSafeWord(
   normalizedText: string,
-  rawText: string,
+  _rawText: string,
   ctx: HouseholdContext,
 ): string | null {
   if (!ctx.safeWord) return null;
-  const normalizedSafeWord = normalize(ctx.safeWord);
-  if (!normalizedSafeWord) return null;
-  if (normalizedText.includes(normalizedSafeWord)) {
-    return rawText.length <= 200 ? rawText : rawText.slice(0, 200) + "…";
+  if (safeWordMatch(normalizedText, ctx.safeWord)) {
+    return "[safe word]";
   }
   return null;
 }

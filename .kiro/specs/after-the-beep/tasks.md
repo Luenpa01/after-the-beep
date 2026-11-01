@@ -14,9 +14,9 @@ Window: October 30 to December 4, 2026, closing at 2:00 PM Pacific. Goal: everyt
   - _Requirements: 1.1, 1.2, 11.1_
 - [x] 3. Implement `packages/risk-engine` with the Appendix A catalog, rules only
   - _Requirements: 4.1, 4.2, 4.3, 4.4_
-- [ ] 4. Write the 6 property tests with fast-check
+- [x] 4. Write the 6 property tests with fast-check
   - _Requirements: 4.3, 4.4, 3.2, 9.1_
-- [ ] 5. Safe word verification with normalization and Levenshtein, max 2 attempts
+- [x] 5. Safe word verification with normalization and Levenshtein, max 2 attempts
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
 
 ## Week 2 (Nov 7 – 13): the full call

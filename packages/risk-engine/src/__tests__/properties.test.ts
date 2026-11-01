@@ -3,6 +3,7 @@ import fc from "fast-check";
 import {
   createInitialAssessment,
   assess,
+  normalize,
   type HouseholdContext,
   type Turn,
 } from "../index";
@@ -163,6 +164,96 @@ describe("property 6 — LLM fallback", () => {
 
         return true;
       }),
+    );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Generators for safe-word properties
+// ---------------------------------------------------------------------------
+
+// Texts that include the safe word or a close variant, mixed with signal phrases.
+const arbTextWithSafeWord = fc.oneof(
+  arbText,
+  fc.constant("tamarindo"),
+  fc.constant("TAMARINDO"),
+  fc.constant("tamarindo por favor"),
+  fc.constant("tomarindo"), // 1 edit from "tamarindo"
+  fc.constant("la palabra es tamarindo"),
+);
+
+// ---------------------------------------------------------------------------
+// Property 4 — Correct safe word never leaves a call at block
+// Design: "Saying the correct safe word never leaves a call at block unless
+//          other signals reach ≥ 60."
+// ---------------------------------------------------------------------------
+
+describe("property 4 — safe word prevents block", () => {
+  it("correct safe word never leaves a call at block unless other signals reach >= 60", () => {
+    const safeWord = "Tamarindo";
+    const ctx: HouseholdContext = { safeWord };
+
+    fc.assert(
+      fc.property(
+        fc.array(arbTextWithSafeWord, { maxLength: 20 }),
+        (texts) => {
+          let a = createInitialAssessment();
+          for (const text of texts) {
+            a = assess(a, callerTurn(text), ctx);
+          }
+          // If the safe word was detected and the call is blocked,
+          // the other signals alone must reach >= 60.
+          if (
+            a.signals.some((s) => s.id === "correct_safe_word") &&
+            a.action === "block"
+          ) {
+            const otherWeight = a.signals
+              .filter((s) => s.id !== "correct_safe_word")
+              .reduce((sum, s) => sum + s.weight, 0);
+            return 10 + otherWeight >= 60;
+          }
+          return true;
+        },
+      ),
+    );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Property 5 — Safe word never appears in any output
+// Design: "The safe word never appears in the stored transcript or in any
+//          output message."
+// ---------------------------------------------------------------------------
+
+describe("property 5 — safe word never leaks", () => {
+  it("the safe word never appears in any signal evidence or output", () => {
+    const safeWord = "Tamarindo";
+    const normalizedSafeWord = normalize(safeWord); // "tamarindo"
+    const ctx: HouseholdContext = { safeWord };
+
+    fc.assert(
+      fc.property(
+        fc.array(arbTextWithSafeWord, { maxLength: 20 }),
+        (texts) => {
+          let a = createInitialAssessment();
+          for (const text of texts) {
+            a = assess(a, callerTurn(text), ctx);
+          }
+
+          for (const signal of a.signals) {
+            // The correct_safe_word signal must use the mask "[safe word]".
+            if (signal.id === "correct_safe_word") {
+              if (signal.evidence !== "[safe word]") return false;
+            }
+            // No signal evidence should contain the safe word as a word.
+            const words = normalize(signal.evidence).split(/\s+/);
+            if (words.includes(normalizedSafeWord)) {
+              return false;
+            }
+          }
+          return true;
+        },
+      ),
     );
   });
 });

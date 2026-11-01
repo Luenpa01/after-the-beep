@@ -12,3 +12,4 @@ export type {
 export { CATALOG, lookup, type SignalDef, type DetectFn } from "./catalog";
 export { createInitialAssessment, assess } from "./engine";
 export { normalize } from "./text";
+export { levenshtein, safeWordMatch, maskSafeWord } from "./levenshtein";

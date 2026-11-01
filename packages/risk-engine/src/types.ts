@@ -71,4 +71,9 @@ export type HouseholdContext = {
   safeWord?: string;
   /** Cuando es true, aplica detección también a contactos de confianza. */
   strictMode?: boolean;
+  /**
+   * Set by the gateway when the caller has been asked for the safe word.
+   * Failed attempts while this is true increment safeWordAttempts (Req 3.5).
+   */
+  expectingSafeWord?: boolean;
 };
