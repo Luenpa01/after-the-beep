@@ -12,7 +12,7 @@ Ventana: 30 de octubre al 4 de diciembre de 2026, cierre a las 2:00 PM hora del 
   - Probar Nova Sonic en español; si no hay soporte, montar Transcribe + Claude + Polly
   - Medir latencia por turno y anotar la decisión en `docs/decisiones.md`
   - _Requisitos: 1.1, 1.2, 11.1_
-- [ ] 3. Implementar `packages/risk-engine` con el catálogo del Anexo A solo con reglas
+- [x] 3. Implementar `packages/risk-engine` con el catálogo del Anexo A solo con reglas
   - _Requisitos: 4.1, 4.2, 4.3, 4.4_
 - [ ] 4. Escribir los 6 tests de propiedades con fast-check
   - _Requisitos: 4.3, 4.4, 3.2, 9.1_
